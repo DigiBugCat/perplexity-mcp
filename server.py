@@ -74,6 +74,57 @@ def format_chat_response(response: dict) -> str:
     return "\n".join(output)
 
 
+def _chat_completion(
+    query: str,
+    model: Literal["sonar", "sonar-pro"],
+    search_mode: Optional[Literal["web", "academic", "sec"]] = None,
+    reasoning_effort: Literal["low", "medium", "high"] = "medium",
+    recency: Optional[Literal["day", "week", "month"]] = None,
+    domain_filter: Optional[list[str]] = None,
+    return_images: bool = False,
+    return_related_questions: bool = False,
+) -> str:
+    """Helper function for chat completion API calls."""
+    try:
+        headers = {
+            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
+            "Content-Type": "application/json"
+        }
+
+        payload = {
+            "model": model,
+            "messages": [{"role": "user", "content": query}],
+            "reasoning_effort": reasoning_effort,
+        }
+
+        if search_mode:
+            payload["search_mode"] = search_mode
+
+        if recency:
+            payload["search_recency_filter"] = recency
+
+        if domain_filter:
+            payload["search_domain_filter"] = domain_filter
+
+        if return_images:
+            payload["return_images"] = True
+
+        if return_related_questions:
+            payload["return_related_questions"] = True
+
+        with httpx.Client(timeout=60.0) as client:
+            response = client.post(CHAT_ENDPOINT, json=payload, headers=headers)
+            response.raise_for_status()
+            data = response.json()
+
+        return format_chat_response(data)
+
+    except httpx.HTTPStatusError as e:
+        return f"Chat API error: {e.response.status_code} - {e.response.text}"
+    except Exception as e:
+        return f"Request failed: {str(e)}"
+
+
 @mcp.tool
 def search(
     query: str,
@@ -141,173 +192,251 @@ def search(
 def ask(
     query: str,
     reasoning_effort: Literal["low", "medium", "high"] = "medium",
-    search_mode: Optional[Literal["web", "academic", "sec"]] = None,
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
 ) -> str:
     """
-    Get a direct answer - returns AI-synthesized response with citations. Perplexity reads sources and gives you the conclusion.
+    Get a direct answer from general web search. Fast and cost-effective.
 
-    Use when:
-    - You need a quick fact or explanation
-    - Answer is the goal, not evaluating sources
-    - You trust Perplexity's synthesis
-    - Time-sensitive questions
+    Perplexity reads sources and gives you the conclusion - the librarian reads the books and tells you the answer.
 
-    Think: The librarian reads the books and tells you the answer.
+    Use for:
+    - Quick facts and definitions ("What is X?")
+    - General explanations and comparisons ("How does X compare to Y?")
+    - Recent news and developments (combine with recency filter)
+    - Most general knowledge questions
 
-    Special capabilities:
-    - Academic mode: Search scholarly papers and research publications
-    - SEC mode: Search financial filings (10-K, 10-Q, 8-K) and regulatory documents
-      → Use for: earnings, quarterly results, revenue, margins, cash flow, financial performance
-    - Recency filtering: Focus on recent results (day/week/month)
-    - Domain filtering: Include or exclude specific websites
-    - Images: Get related visual content
-    - Related questions: Receive follow-up suggestions
-
-    Example use cases:
-    - "What is X?" - quick facts and definitions
-    - "How does X compare to Y?" - comparative analysis
-    - Recent developments (use recency='week')
-    - Academic questions (use search_mode='academic')
-    - Company earnings/financials (MUST use search_mode='sec')
-      Examples: "Tesla Q4 earnings", "Apple revenue 2024", "Microsoft cash flow"
+    NOT for financial filings or academic papers - use ask_sec or ask_academic instead.
 
     Args:
-        query: Question or topic to get an AI answer about
-        reasoning_effort: How much reasoning to apply - 'low' (faster),
-                         'medium' (balanced, default), or 'high' (more thorough)
-        search_mode: Search type - 'web' (default), 'academic' (scholarly sources),
-                    or 'sec' (SEC filings)
-        recency: Filter sources by time - 'day', 'week', or 'month'
-        domain_filter: Include/exclude specific domains (e.g., ['wikipedia.org'] or ['-reddit.com'])
-        return_images: Include related images in the response
-        return_related_questions: Include follow-up question suggestions
+        query: Your question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
+        recency: Focus on recent results - 'day', 'week', or 'month'
+        domain_filter: Include/exclude domains (e.g., ['wikipedia.org'] or ['-reddit.com'])
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
 
     Returns:
-        AI-generated answer with citations and optional images/related questions
+        AI-synthesized answer with citations
     """
-    try:
-        headers = {
-            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-            "Content-Type": "application/json"
-        }
-
-        payload = {
-            "model": "sonar",
-            "messages": [{"role": "user", "content": query}],
-        }
-
-        # Map reasoning_effort to actual reasoning_effort parameter
-        effort_map = {"low": "low", "medium": "medium", "high": "high"}
-        if reasoning_effort in effort_map:
-            payload["reasoning_effort"] = effort_map[reasoning_effort]
-
-        if search_mode:
-            payload["search_mode"] = search_mode
-
-        if recency:
-            payload["search_recency_filter"] = recency
-
-        if domain_filter:
-            payload["search_domain_filter"] = domain_filter
-
-        if return_images:
-            payload["return_images"] = True
-
-        if return_related_questions:
-            payload["return_related_questions"] = True
-
-        with httpx.Client(timeout=60.0) as client:
-            response = client.post(CHAT_ENDPOINT, json=payload, headers=headers)
-            response.raise_for_status()
-            data = response.json()
-
-        return format_chat_response(data)
-
-    except httpx.HTTPStatusError as e:
-        return f"Chat API error: {e.response.status_code} - {e.response.text}"
-    except Exception as e:
-        return f"Request failed: {str(e)}"
+    return _chat_completion(
+        query=query,
+        model="sonar",
+        search_mode="web",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
 
 
 @mcp.tool
 def ask_more(
     query: str,
     reasoning_effort: Literal["low", "medium", "high"] = "medium",
-    search_mode: Optional[Literal["web", "academic", "sec"]] = None,
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
 ) -> str:
     """
-    Like 'ask' but significantly MORE comprehensive and detailed. Slower and more expensive.
+    Like 'ask' but significantly MORE comprehensive and detailed for general web questions. Slower and more expensive.
 
-    Use when: Standard 'ask' doesn't provide enough depth or you need thorough investigation.
-
-    Same capabilities as 'ask' including:
-    - SEC mode for financial filings (earnings, quarterly results, 10-K/10-Q)
-    - Academic mode for scholarly research
-    - All filtering options (recency, domain, images, etc.)
+    Use when: Standard 'ask' doesn't provide enough depth for your general web research question.
 
     Args:
-        query: Complex question requiring deeper analysis
-        reasoning_effort: How much reasoning to apply - 'low' (faster),
-                         'medium' (balanced, default), or 'high' (most thorough)
-        search_mode: Search type - 'web' (default), 'academic', or 'sec'
-        recency: Filter sources by time - 'day', 'week', or 'month'
-        domain_filter: Include/exclude specific domains
-        return_images: Include related images in the response
-        return_related_questions: Include follow-up question suggestions
+        query: Your complex question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
+        recency: Focus on recent results - 'day', 'week', or 'month'
+        domain_filter: Include/exclude domains
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
 
     Returns:
-        Comprehensive AI-generated answer with detailed citations
+        Comprehensive AI-synthesized answer with detailed citations
     """
-    try:
-        headers = {
-            "Authorization": f"Bearer {PERPLEXITY_API_KEY}",
-            "Content-Type": "application/json"
-        }
+    return _chat_completion(
+        query=query,
+        model="sonar-pro",
+        search_mode="web",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
 
-        payload = {
-            "model": "sonar-pro",
-            "messages": [{"role": "user", "content": query}],
-        }
 
-        # Map reasoning_effort to actual reasoning_effort parameter
-        effort_map = {"low": "low", "medium": "medium", "high": "high"}
-        if reasoning_effort in effort_map:
-            payload["reasoning_effort"] = effort_map[reasoning_effort]
+@mcp.tool
+def ask_sec(
+    query: str,
+    reasoning_effort: Literal["low", "medium", "high"] = "medium",
+    recency: Optional[Literal["day", "week", "month"]] = None,
+    domain_filter: Optional[list[str]] = None,
+    return_images: bool = False,
+    return_related_questions: bool = False,
+) -> str:
+    """
+    Get answers from SEC filings and financial regulatory documents.
 
-        if search_mode:
-            payload["search_mode"] = search_mode
+    Use for company financials:
+    - Earnings reports and quarterly results
+    - Revenue, margins, cash flow, profitability
+    - 10-K annual reports, 10-Q quarterly filings, 8-K current reports
+    - Financial performance analysis
+    - Regulatory disclosures
 
-        if recency:
-            payload["search_recency_filter"] = recency
+    Examples:
+    - "Tesla Q4 2024 earnings and revenue"
+    - "Apple cash flow analysis 2024"
+    - "Microsoft quarterly results latest"
+    - "Pure Storage financial performance 2025"
 
-        if domain_filter:
-            payload["search_domain_filter"] = domain_filter
+    Args:
+        query: Your financial question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
+        recency: Focus on recent filings - 'day', 'week', or 'month'
+        domain_filter: Include/exclude domains
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
 
-        if return_images:
-            payload["return_images"] = True
+    Returns:
+        AI-synthesized answer from SEC filings with citations
+    """
+    return _chat_completion(
+        query=query,
+        model="sonar",
+        search_mode="sec",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
 
-        if return_related_questions:
-            payload["return_related_questions"] = True
 
-        with httpx.Client(timeout=60.0) as client:
-            response = client.post(CHAT_ENDPOINT, json=payload, headers=headers)
-            response.raise_for_status()
-            data = response.json()
+@mcp.tool
+def ask_sec_more(
+    query: str,
+    reasoning_effort: Literal["low", "medium", "high"] = "medium",
+    recency: Optional[Literal["day", "week", "month"]] = None,
+    domain_filter: Optional[list[str]] = None,
+    return_images: bool = False,
+    return_related_questions: bool = False,
+) -> str:
+    """
+    Like 'ask_sec' but MORE comprehensive financial analysis. Slower and more expensive.
 
-        return format_chat_response(data)
+    Use when: Standard 'ask_sec' doesn't provide enough depth for complex financial analysis.
 
-    except httpx.HTTPStatusError as e:
-        return f"Chat API error: {e.response.status_code} - {e.response.text}"
-    except Exception as e:
-        return f"Request failed: {str(e)}"
+    Args:
+        query: Your complex financial question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
+        recency: Focus on recent filings
+        domain_filter: Include/exclude domains
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
+
+    Returns:
+        Comprehensive financial analysis from SEC filings
+    """
+    return _chat_completion(
+        query=query,
+        model="sonar-pro",
+        search_mode="sec",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
+
+
+@mcp.tool
+def ask_academic(
+    query: str,
+    reasoning_effort: Literal["low", "medium", "high"] = "medium",
+    recency: Optional[Literal["day", "week", "month"]] = None,
+    domain_filter: Optional[list[str]] = None,
+    return_images: bool = False,
+    return_related_questions: bool = False,
+) -> str:
+    """
+    Get answers from scholarly papers and academic research publications.
+
+    Use for research questions:
+    - Scientific studies and research findings
+    - Academic papers and peer-reviewed publications
+    - Scholarly analysis and literature reviews
+    - Research methodologies and results
+    - Citations to academic sources
+
+    Examples:
+    - "Latest research on transformer neural networks"
+    - "Climate change impact studies 2024"
+    - "Quantum computing breakthroughs"
+
+    Args:
+        query: Your research question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
+        recency: Focus on recent research - 'day', 'week', or 'month'
+        domain_filter: Include/exclude domains
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
+
+    Returns:
+        AI-synthesized answer from academic sources with citations
+    """
+    return _chat_completion(
+        query=query,
+        model="sonar",
+        search_mode="academic",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
+
+
+@mcp.tool
+def ask_academic_more(
+    query: str,
+    reasoning_effort: Literal["low", "medium", "high"] = "medium",
+    recency: Optional[Literal["day", "week", "month"]] = None,
+    domain_filter: Optional[list[str]] = None,
+    return_images: bool = False,
+    return_related_questions: bool = False,
+) -> str:
+    """
+    Like 'ask_academic' but MORE comprehensive academic research. Slower and more expensive.
+
+    Use when: Standard 'ask_academic' doesn't provide enough depth for complex research questions.
+
+    Args:
+        query: Your complex research question
+        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
+        recency: Focus on recent research
+        domain_filter: Include/exclude domains
+        return_images: Include related images
+        return_related_questions: Get follow-up question suggestions
+
+    Returns:
+        Comprehensive academic research synthesis
+    """
+    return _chat_completion(
+        query=query,
+        model="sonar-pro",
+        search_mode="academic",
+        reasoning_effort=reasoning_effort,
+        recency=recency,
+        domain_filter=domain_filter,
+        return_images=return_images,
+        return_related_questions=return_related_questions,
+    )
 
 
 if __name__ == "__main__":
