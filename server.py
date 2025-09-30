@@ -78,18 +78,25 @@ def format_chat_response(response: dict) -> str:
 def search(
     query: str,
     max_results: int = 10,
-    recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
 ) -> str:
     """
-    Use this FIRST when you don't know about a topic. Search for sources to
-    understand what's out there before asking questions. Returns URLs, titles,
-    and snippets from web search results.
+    Returns a list of web sources with URLs, titles, and snippets - like getting raw Google results.
+
+    Use when you need:
+    - Specific documents or links to reference
+    - Multiple sources to evaluate
+    - Discovery: seeing what's available on a topic
+
+    Examples:
+    - Find official documentation sites
+    - Look for recent articles on a topic
+    - Filter to trusted domains like .edu or .gov sites
+    - Exclude social media sites from results
 
     Args:
         query: Search query to find relevant sources
         max_results: Maximum number of results to return (default: 10)
-        recency: Filter by time period - 'day', 'week', or 'month'
         domain_filter: List of domains to include (e.g., ['wikipedia.org']) or
                       exclude (prefix with '-', e.g., ['-reddit.com'])
 
@@ -106,9 +113,6 @@ def search(
             "query": query,
             "max_results": max_results,
         }
-
-        if recency:
-            payload["search_recency_filter"] = recency
 
         if domain_filter:
             payload["search_domain_filter"] = domain_filter
@@ -141,10 +145,22 @@ def ask(
     return_related_questions: bool = False,
 ) -> str:
     """
-    After searching, use this to get AI-synthesized answers about the topic.
-    It will search the web and give you a grounded response with citations.
+    Returns an AI-synthesized answer from web search with citations. Fast and cost-effective.
 
-    Uses the 'sonar' model for fast, cost-effective answers.
+    Special capabilities:
+    - Academic mode: Search scholarly papers and research publications
+    - SEC mode: Search financial filings and regulatory documents
+    - Recency filtering: Focus on results from the past day, week, or month
+    - Domain filtering: Include or exclude specific websites
+    - Images: Get related images in the response
+    - Related questions: Receive follow-up question suggestions
+
+    Example use cases:
+    - Quick facts and explanations about any topic
+    - Recent news and developments (use recency filter)
+    - Academic research questions (use academic mode)
+    - Company financial information (use SEC mode)
+    - Visual content needs (enable images)
 
     Args:
         query: Question or topic to get an AI answer about
@@ -215,11 +231,11 @@ def ask_more(
     return_related_questions: bool = False,
 ) -> str:
     """
-    When 'ask' wasn't detailed enough or you need more comprehensive analysis.
-    Uses a more capable model (sonar-pro) for complex questions.
+    Like 'ask' but significantly MORE comprehensive and detailed. Slower and more expensive.
 
-    This is more expensive than 'ask' but provides deeper, more thorough answers.
-    Use this when the standard 'ask' tool doesn't provide sufficient depth.
+    Use when: Standard 'ask' doesn't provide enough depth or you need thorough investigation.
+
+    Same parameters as 'ask' (search_mode, domain_filter, recency, etc.) but with deeper analysis.
 
     Args:
         query: Complex question requiring deeper analysis
