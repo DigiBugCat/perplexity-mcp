@@ -1,0 +1,18 @@
+[project]
+name = "perplexity-mcp"
+version = "0.1.0"
+description = "FastMCP server for Perplexity API - provides web search and grounded AI answers"
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "fastmcp>=2.0.0",
+    "httpx>=0.27.0",
+    "python-dotenv>=1.0.0",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/perplexity-mcp"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
