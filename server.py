@@ -132,15 +132,16 @@ def search(
     domain_filter: Optional[list[str]] = None,
 ) -> str:
     """
-    Find and evaluate sources yourself - returns URLs, titles, and snippets so you can assess quality and make your own conclusions.
+    **PREFER THIS FIRST** - Find and evaluate sources yourself. Returns URLs, titles, and snippets so you can assess quality and make your own conclusions.
+
+    Start here to ground yourself before using ask tools. The librarian shows you the shelf - you decide what matters.
 
     Use when:
+    - Starting research on any topic (preferred first step)
     - You need to assess source quality or credibility
     - Looking for specific documents, reports, or official pages
     - You want control over what information to trust
     - Research requires seeing multiple perspectives
-
-    Think: The librarian shows you the shelf - you decide what matters.
 
     Examples:
     - Find official documentation sites
@@ -199,6 +200,8 @@ def ask(
 ) -> str:
     """
     Get a direct answer from general web search. Fast and cost-effective.
+
+    **Consider using 'search' first** to ground yourself with sources before getting synthesized answers.
 
     Perplexity reads sources and gives you the conclusion - the librarian reads the books and tells you the answer.
 
@@ -281,6 +284,8 @@ def ask_sec(
 ) -> str:
     """
     Get answers from SEC filings and financial regulatory documents.
+
+    **Tip**: Consider using 'search' first to find the relevant filings, then use this for synthesis.
 
     Use for company financials:
     - Earnings reports and quarterly results
@@ -366,6 +371,8 @@ def ask_academic(
 ) -> str:
     """
     Get answers from scholarly papers and academic research publications.
+
+    **Tip**: Consider using 'search' first to find relevant papers, then use this for synthesis.
 
     Use for research questions:
     - Scientific studies and research findings
