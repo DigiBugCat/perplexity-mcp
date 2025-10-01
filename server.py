@@ -89,6 +89,7 @@ def _chat_completion(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """Helper function for chat completion API calls."""
     try:
@@ -97,9 +98,15 @@ def _chat_completion(
             "Content-Type": "application/json"
         }
 
+        # Build messages array
+        messages = []
+        if system_prompt:
+            messages.append({"role": "system", "content": system_prompt})
+        messages.append({"role": "user", "content": query})
+
         payload = {
             "model": model,
-            "messages": [{"role": "user", "content": query}],
+            "messages": messages,
             "max_tokens": max_tokens,
             "web_search_options": {
                 "search_context_size": search_context_size
@@ -227,6 +234,7 @@ def ask(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Get a direct answer from general web search. Fast and cost-effective.
@@ -256,6 +264,7 @@ def ask(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         AI-synthesized answer with citations
@@ -275,6 +284,7 @@ def ask(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -292,6 +302,7 @@ def ask_more(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Like 'ask' but significantly MORE comprehensive and detailed for general web questions. Slower and more expensive.
@@ -311,6 +322,7 @@ def ask_more(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         Comprehensive AI-synthesized answer with detailed citations
@@ -330,6 +342,7 @@ def ask_more(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -347,6 +360,7 @@ def ask_sec(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Get answers from SEC filings and financial regulatory documents.
@@ -379,6 +393,7 @@ def ask_sec(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         AI-synthesized answer from SEC filings with citations
@@ -398,6 +413,7 @@ def ask_sec(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -415,6 +431,7 @@ def ask_sec_more(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Like 'ask_sec' but MORE comprehensive financial analysis. Slower and more expensive.
@@ -434,6 +451,7 @@ def ask_sec_more(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         Comprehensive financial analysis from SEC filings
@@ -453,6 +471,7 @@ def ask_sec_more(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -470,6 +489,7 @@ def ask_academic(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Get answers from scholarly papers and academic research publications.
@@ -501,6 +521,7 @@ def ask_academic(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         AI-synthesized answer from academic sources with citations
@@ -520,6 +541,7 @@ def ask_academic(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -537,6 +559,7 @@ def ask_academic_more(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Like 'ask_academic' but MORE comprehensive academic research. Slower and more expensive.
@@ -556,6 +579,7 @@ def ask_academic_more(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         Comprehensive academic research synthesis
@@ -575,6 +599,7 @@ def ask_academic_more(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -592,6 +617,7 @@ def ask_reasoning(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Get answers with step-by-step reasoning using the sonar-reasoning model.
@@ -618,6 +644,7 @@ def ask_reasoning(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         Answer with explicit reasoning steps and citations
@@ -637,6 +664,7 @@ def ask_reasoning(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
@@ -654,6 +682,7 @@ def ask_reasoning_more(
     last_updated_after: Optional[str] = None,
     last_updated_before: Optional[str] = None,
     user_location: Optional[dict] = None,
+    system_prompt: Optional[str] = "Be direct and concise. Provide facts and data without unnecessary elaboration or preamble. Focus on actionable information over explanations. Cite sources but keep commentary minimal. Avoid speculation - if information is unavailable, state it clearly. Present findings efficiently, not exhaustively.",
 ) -> str:
     """
     Like 'ask_reasoning' but with MORE comprehensive reasoning using sonar-reasoning-pro.
@@ -676,6 +705,7 @@ def ask_reasoning_more(
         last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
         last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
         user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
         Comprehensive answer with detailed reasoning steps and citations
@@ -695,6 +725,7 @@ def ask_reasoning_more(
         last_updated_after=last_updated_after,
         last_updated_before=last_updated_before,
         user_location=user_location,
+        system_prompt=system_prompt,
     )
 
 
