@@ -253,17 +253,30 @@ def ask(
 
     Args:
         query: Your question
-        recency: Focus on recent results - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains (e.g., ['wikipedia.org'] or ['-reddit.com'])
+        recency: Quick filter for recent content - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['wikipedia.org', 'github.com']
+            - Denylist (exclude): ['-reddit.com', '-quora.com']
+            - URL-specific: ['https://stackoverflow.com/questions/tagged/python']
+            - Mixed: ['github.com', '-https://github.com/trending'] (allow domain, exclude specific page)
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 500)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 500). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 pages). Use for simple facts.
+            - 'medium': Balanced speed/coverage (~5-10 pages). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 pages). Use for research/deep analysis.
+        search_after_date: Filter by publication date - content published after date (format: "MM/DD/YYYY"). Use for "news since X".
+        search_before_date: Filter by publication date - content published before date (format: "MM/DD/YYYY"). Use for "historical context before X".
+        last_updated_after: Filter by last-modified date - content updated after date (format: "MM/DD/YYYY"). Use for "actively maintained docs".
+        last_updated_before: Filter by last-modified date - content updated before date (format: "MM/DD/YYYY"). Use for "stale/archived content".
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -311,17 +324,30 @@ def ask_more(
 
     Args:
         query: Your complex question
-        recency: Focus on recent results - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent content - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['wikipedia.org', 'github.com']
+            - Denylist (exclude): ['-reddit.com', '-quora.com']
+            - URL-specific: ['https://stackoverflow.com/questions/tagged/python']
+            - Mixed: ['github.com', '-https://github.com/trending'] (allow domain, exclude specific page)
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 1000)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 1000). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 pages). Use for simple facts.
+            - 'medium': Balanced speed/coverage (~5-10 pages). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 pages). Use for research/deep analysis.
+        search_after_date: Filter by publication date - content published after date (format: "MM/DD/YYYY"). Use for "news since X".
+        search_before_date: Filter by publication date - content published before date (format: "MM/DD/YYYY"). Use for "historical context before X".
+        last_updated_after: Filter by last-modified date - content updated after date (format: "MM/DD/YYYY"). Use for "actively maintained docs".
+        last_updated_before: Filter by last-modified date - content updated before date (format: "MM/DD/YYYY"). Use for "stale/archived content".
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -382,17 +408,29 @@ def ask_sec(
 
     Args:
         query: Your financial question
-        recency: Focus on recent filings - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent filings - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['sec.gov', 'edgar.sec.gov']
+            - Denylist (exclude): ['-reddit.com', '-seekingalpha.com']
+            - URL-specific: ['https://sec.gov/cik-lookup/0001234567']
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 500)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 500). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 filings). Use for simple metrics.
+            - 'medium': Balanced speed/coverage (~5-10 filings). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 filings). Use for deep financial analysis.
+        search_after_date: Filter by filing date - filings published after date (format: "MM/DD/YYYY"). Use for "filings since Q1 2024".
+        search_before_date: Filter by filing date - filings published before date (format: "MM/DD/YYYY"). Use for "historical filings before merger".
+        last_updated_after: Filter by amendment date - filings updated after date (format: "MM/DD/YYYY"). Use for "recently amended filings".
+        last_updated_before: Filter by amendment date - filings updated before date (format: "MM/DD/YYYY"). Rarely used for SEC data.
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -440,17 +478,29 @@ def ask_sec_more(
 
     Args:
         query: Your complex financial question
-        recency: Focus on recent filings
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent filings - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['sec.gov', 'edgar.sec.gov']
+            - Denylist (exclude): ['-reddit.com', '-seekingalpha.com']
+            - URL-specific: ['https://sec.gov/cik-lookup/0001234567']
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 1000)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 1000). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 filings). Use for simple metrics.
+            - 'medium': Balanced speed/coverage (~5-10 filings). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 filings). Use for deep financial analysis.
+        search_after_date: Filter by filing date - filings published after date (format: "MM/DD/YYYY"). Use for "filings since Q1 2024".
+        search_before_date: Filter by filing date - filings published before date (format: "MM/DD/YYYY"). Use for "historical filings before merger".
+        last_updated_after: Filter by amendment date - filings updated after date (format: "MM/DD/YYYY"). Use for "recently amended filings".
+        last_updated_before: Filter by amendment date - filings updated before date (format: "MM/DD/YYYY"). Rarely used for SEC data.
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -510,17 +560,29 @@ def ask_academic(
 
     Args:
         query: Your research question
-        recency: Focus on recent research - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent research - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['arxiv.org', 'scholar.google.com', 'pubmed.ncbi.nlm.nih.gov']
+            - Denylist (exclude): ['-researchgate.net', '-academia.edu']
+            - URL-specific: ['https://arxiv.org/list/cs.AI/recent']
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 500)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 500). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 papers). Use for simple fact-checking.
+            - 'medium': Balanced speed/coverage (~5-10 papers). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 papers). Use for literature reviews.
+        search_after_date: Filter by publication date - papers published after date (format: "MM/DD/YYYY"). Use for "research since 2024".
+        search_before_date: Filter by publication date - papers published before date (format: "MM/DD/YYYY"). Use for "pre-2020 foundational work".
+        last_updated_after: Filter by revision date - papers updated after date (format: "MM/DD/YYYY"). Use for "recently revised preprints".
+        last_updated_before: Filter by revision date - papers updated before date (format: "MM/DD/YYYY"). Rarely used for academic search.
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -568,17 +630,29 @@ def ask_academic_more(
 
     Args:
         query: Your complex research question
-        recency: Focus on recent research
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent research - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['arxiv.org', 'scholar.google.com', 'pubmed.ncbi.nlm.nih.gov']
+            - Denylist (exclude): ['-researchgate.net', '-academia.edu']
+            - URL-specific: ['https://arxiv.org/list/cs.AI/recent']
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 1000)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 1000). Higher = longer responses but more expensive. Includes citations.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 papers). Use for simple fact-checking.
+            - 'medium': Balanced speed/coverage (~5-10 papers). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 papers). Use for literature reviews.
+        search_after_date: Filter by publication date - papers published after date (format: "MM/DD/YYYY"). Use for "research since 2024".
+        search_before_date: Filter by publication date - papers published before date (format: "MM/DD/YYYY"). Use for "pre-2020 foundational work".
+        last_updated_after: Filter by revision date - papers updated after date (format: "MM/DD/YYYY"). Use for "recently revised preprints".
+        last_updated_before: Filter by revision date - papers updated before date (format: "MM/DD/YYYY"). Rarely used for academic search.
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -633,17 +707,30 @@ def ask_reasoning(
 
     Args:
         query: Your question
-        recency: Focus on recent results - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains (e.g., ['wikipedia.org'] or ['-reddit.com'])
+        recency: Quick filter for recent content - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['wikipedia.org', 'github.com']
+            - Denylist (exclude): ['-reddit.com', '-quora.com']
+            - URL-specific: ['https://stackoverflow.com/questions/tagged/python']
+            - Mixed: ['github.com', '-https://github.com/trending'] (allow domain, exclude specific page)
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 500)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 500). Higher = longer responses but more expensive. Includes citations and reasoning steps.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 pages). Use for simple facts.
+            - 'medium': Balanced speed/coverage (~5-10 pages). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 pages). Use for research/deep analysis.
+        search_after_date: Filter by publication date - content published after date (format: "MM/DD/YYYY"). Use for "news since X".
+        search_before_date: Filter by publication date - content published before date (format: "MM/DD/YYYY"). Use for "historical context before X".
+        last_updated_after: Filter by last-modified date - content updated after date (format: "MM/DD/YYYY"). Use for "actively maintained docs".
+        last_updated_before: Filter by last-modified date - content updated before date (format: "MM/DD/YYYY"). Use for "stale/archived content".
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
@@ -694,17 +781,30 @@ def ask_reasoning_more(
 
     Args:
         query: Your complex question
-        recency: Focus on recent results - 'day', 'week', or 'month'
-        domain_filter: Include/exclude domains
+        recency: Quick filter for recent content - 'day', 'week', or 'month'. Simpler than search_after_date. If both specified, search_after_date takes precedence.
+        domain_filter: Filter sources by domain or URL. Prefix with '-' to exclude.
+            - Allowlist only: ['wikipedia.org', 'github.com']
+            - Denylist (exclude): ['-reddit.com', '-quora.com']
+            - URL-specific: ['https://stackoverflow.com/questions/tagged/python']
+            - Mixed: ['github.com', '-https://github.com/trending'] (allow domain, exclude specific page)
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
-        max_tokens: Maximum tokens in response (default: 1000)
-        search_context_size: Search context size - 'low' (efficient), 'medium' (default), 'high' (comprehensive)
-        search_after_date: Only results published after this date (format: "MM/DD/YYYY")
-        search_before_date: Only results published before this date (format: "MM/DD/YYYY")
-        last_updated_after: Only results updated after this date (format: "MM/DD/YYYY")
-        last_updated_before: Only results updated before this date (format: "MM/DD/YYYY")
-        user_location: Geographic location for localized results (dict with country, region, city, latitude, longitude)
+        max_tokens: Maximum response length in tokens (default: 1000). Higher = longer responses but more expensive. Includes citations and reasoning steps.
+        search_context_size: Web search depth - controls sources retrieved and cost.
+            - 'low': Faster, cheaper, fewer sources (~3-5 pages). Use for simple facts.
+            - 'medium': Balanced speed/coverage (~5-10 pages). Good default.
+            - 'high': Slower, expensive, comprehensive (~10-20 pages). Use for research/deep analysis.
+        search_after_date: Filter by publication date - content published after date (format: "MM/DD/YYYY"). Use for "news since X".
+        search_before_date: Filter by publication date - content published before date (format: "MM/DD/YYYY"). Use for "historical context before X".
+        last_updated_after: Filter by last-modified date - content updated after date (format: "MM/DD/YYYY"). Use for "actively maintained docs".
+        last_updated_before: Filter by last-modified date - content updated before date (format: "MM/DD/YYYY"). Use for "stale/archived content".
+        user_location: Geographic context for localized results. Dict with optional fields:
+            - country (str): ISO code like "US", "GB"
+            - region (str): State/province, e.g. "CA", "Ontario"
+            - city (str): City name, e.g. "San Francisco"
+            - latitude (float): Decimal degrees
+            - longitude (float): Decimal degrees
+            Example: {"country": "US", "region": "CA", "city": "San Francisco"}
         system_prompt: Controls response style/format. Default optimizes for concise, fact-focused responses. Set to None to disable, or provide custom instructions.
 
     Returns:
