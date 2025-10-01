@@ -140,23 +140,17 @@ def _chat_completion(
 def search(
     query: str,
     max_results: int = 10,
-    max_tokens_per_page: int = 300,
-    recency: Optional[Literal["day", "week", "month"]] = None,
-    domain_filter: Optional[list[str]] = None,
-    search_mode: Optional[Literal["academic"]] = None,
-    search_context_size: Optional[Literal["low", "high"]] = None,
+    max_tokens_per_page: int = 1024,
+    country: Optional[str] = None,
 ) -> str:
     """
     **PREFER THIS FIRST** - Find and evaluate sources yourself. Returns URLs, titles, and snippets.
 
     Args:
         query: Search query
-        max_results: Max results (default: 10)
-        max_tokens_per_page: Max tokens per page (default: 300)
-        recency: Recent content filter - 'day', 'week', or 'month'
-        domain_filter: Filter by domain. Use '-' to exclude. Examples: ['github.com'], ['-reddit.com']
-        search_mode: Use "academic" for scholarly sources
-        search_context_size: 'low' (fast) or 'high' (detailed)
+        max_results: Max results (1-20, default: 10)
+        max_tokens_per_page: Max tokens per page (default: 1024)
+        country: Two-letter country code to filter results (e.g., 'US', 'GB', 'DE')
 
     Returns:
         Search results with titles, URLs, and snippets
@@ -173,18 +167,8 @@ def search(
             "max_tokens_per_page": max_tokens_per_page,
         }
 
-        # Add optional filters
-        if recency:
-            payload["search_recency_filter"] = recency
-
-        if domain_filter:
-            payload["search_domain_filter"] = domain_filter
-
-        if search_mode:
-            payload["search_mode"] = search_mode
-
-        if search_context_size:
-            payload["search_context_size"] = search_context_size
+        if country:
+            payload["country"] = country
 
         with httpx.Client(timeout=30.0) as client:
             response = client.post(SEARCH_ENDPOINT, json=payload, headers=headers)
