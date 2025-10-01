@@ -78,12 +78,12 @@ def _chat_completion(
     query: str,
     model: Literal["sonar", "sonar-pro"],
     search_mode: Optional[Literal["web", "academic", "sec"]] = None,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 500,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """Helper function for chat completion API calls."""
     try:
@@ -95,8 +95,10 @@ def _chat_completion(
         payload = {
             "model": model,
             "messages": [{"role": "user", "content": query}],
-            "reasoning_effort": reasoning_effort,
             "max_tokens": max_tokens,
+            "web_search_options": {
+                "search_context_size": search_context_size
+            }
         }
 
         if search_mode:
@@ -132,6 +134,7 @@ def search(
     query: str,
     max_results: int = 10,
     domain_filter: Optional[list[str]] = None,
+    max_tokens_per_page: int = 300,
 ) -> str:
     """
     **PREFER THIS FIRST** - Find and evaluate sources yourself. Returns URLs, titles, and snippets so you can assess quality and make your own conclusions.
@@ -156,6 +159,7 @@ def search(
         max_results: Maximum number of results to return (default: 10)
         domain_filter: List of domains to include (e.g., ['wikipedia.org']) or
                       exclude (prefix with '-', e.g., ['-reddit.com'])
+        max_tokens_per_page: Maximum tokens to extract per page (default: 300)
 
     Returns:
         Formatted search results with titles, URLs, and snippets
@@ -169,6 +173,7 @@ def search(
         payload = {
             "query": query,
             "max_results": max_results,
+            "max_tokens_per_page": max_tokens_per_page,
         }
 
         if domain_filter:
@@ -194,12 +199,12 @@ def search(
 @mcp.tool
 def ask(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 500,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Get a direct answer from general web search. Fast and cost-effective.
@@ -218,12 +223,12 @@ def ask(
 
     Args:
         query: Your question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
         recency: Focus on recent results - 'day', 'week', or 'month'
         domain_filter: Include/exclude domains (e.g., ['wikipedia.org'] or ['-reddit.com'])
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 500)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         AI-synthesized answer with citations
@@ -232,24 +237,24 @@ def ask(
         query=query,
         model="sonar",
         search_mode="web",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
 @mcp.tool
 def ask_more(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 1000,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Like 'ask' but significantly MORE comprehensive and detailed for general web questions. Slower and more expensive.
@@ -258,12 +263,12 @@ def ask_more(
 
     Args:
         query: Your complex question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
         recency: Focus on recent results - 'day', 'week', or 'month'
         domain_filter: Include/exclude domains
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 1000)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         Comprehensive AI-synthesized answer with detailed citations
@@ -272,24 +277,24 @@ def ask_more(
         query=query,
         model="sonar-pro",
         search_mode="web",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
 @mcp.tool
 def ask_sec(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 500,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Get answers from SEC filings and financial regulatory documents.
@@ -311,12 +316,12 @@ def ask_sec(
 
     Args:
         query: Your financial question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
         recency: Focus on recent filings - 'day', 'week', or 'month'
         domain_filter: Include/exclude domains
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 500)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         AI-synthesized answer from SEC filings with citations
@@ -325,24 +330,24 @@ def ask_sec(
         query=query,
         model="sonar",
         search_mode="sec",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
 @mcp.tool
 def ask_sec_more(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 1000,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Like 'ask_sec' but MORE comprehensive financial analysis. Slower and more expensive.
@@ -351,12 +356,12 @@ def ask_sec_more(
 
     Args:
         query: Your complex financial question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
         recency: Focus on recent filings
         domain_filter: Include/exclude domains
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 1000)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         Comprehensive financial analysis from SEC filings
@@ -365,24 +370,24 @@ def ask_sec_more(
         query=query,
         model="sonar-pro",
         search_mode="sec",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
 @mcp.tool
 def ask_academic(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 500,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Get answers from scholarly papers and academic research publications.
@@ -403,12 +408,12 @@ def ask_academic(
 
     Args:
         query: Your research question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (thorough)
         recency: Focus on recent research - 'day', 'week', or 'month'
         domain_filter: Include/exclude domains
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 500)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         AI-synthesized answer from academic sources with citations
@@ -417,24 +422,24 @@ def ask_academic(
         query=query,
         model="sonar",
         search_mode="academic",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
 @mcp.tool
 def ask_academic_more(
     query: str,
-    reasoning_effort: Literal["low", "medium", "high"] = "medium",
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
     max_tokens: int = 1000,
+    search_context_size: Literal["low", "medium", "high"] = "low",
 ) -> str:
     """
     Like 'ask_academic' but MORE comprehensive academic research. Slower and more expensive.
@@ -443,12 +448,12 @@ def ask_academic_more(
 
     Args:
         query: Your complex research question
-        reasoning_effort: 'low' (fastest), 'medium' (balanced, default), 'high' (most thorough)
         recency: Focus on recent research
         domain_filter: Include/exclude domains
         return_images: Include related images
         return_related_questions: Get follow-up question suggestions
         max_tokens: Maximum tokens in response (default: 1000)
+        search_context_size: Search context size - 'low' (efficient, default), 'medium', 'high' (comprehensive)
 
     Returns:
         Comprehensive academic research synthesis
@@ -457,12 +462,12 @@ def ask_academic_more(
         query=query,
         model="sonar-pro",
         search_mode="academic",
-        reasoning_effort=reasoning_effort,
         recency=recency,
         domain_filter=domain_filter,
         return_images=return_images,
         return_related_questions=return_related_questions,
         max_tokens=max_tokens,
+        search_context_size=search_context_size,
     )
 
 
