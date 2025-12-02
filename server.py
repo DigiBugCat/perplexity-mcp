@@ -76,7 +76,7 @@ def format_chat_response(response: dict) -> str:
 
 def _chat_completion(
     query: str,
-    model: Literal["sonar", "sonar-pro", "sonar-reasoning", "sonar-reasoning-pro"],
+    model: Literal["sonar", "sonar-pro", "sonar-reasoning-pro"],
     search_mode: Optional[Literal["web", "academic", "sec"]] = None,
     recency: Optional[Literal["day", "week", "month"]] = None,
     domain_filter: Optional[list[str]] = None,
@@ -260,8 +260,8 @@ def ask_reasoning(
     Returns:
         Answer with explicit reasoning steps and citations
     """
-    # Map scope to model
-    model = "sonar-reasoning" if scope == "standard" else "sonar-reasoning-pro"
+    # sonar-reasoning deprecated Dec 15, 2025 - always use sonar-reasoning-pro
+    model = "sonar-reasoning-pro"
 
     # Map thoroughness to search_context_size
     search_context_size = "low" if thoroughness == "quick" else "high"
