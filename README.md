@@ -141,7 +141,7 @@ FastMCP Cloud automatically:
 
 - `query`: Search query string
 - `max_results`: Number of results (default: 10)
-- `recency`: Filter by time - `"day"`, `"week"`, or `"month"`
+- `recency`: Filter by time - `"day"`, `"week"`, `"month"`, or `"year"`
 - `domain_filter`: Include/exclude domains
   - Include: `["wikipedia.org", "github.com"]`
   - Exclude: `["-reddit.com", "-pinterest.com"]`

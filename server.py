@@ -53,11 +53,13 @@ def format_chat_response(response: dict) -> str:
 
     output = [content]
 
-    # Add citations if available
-    if citations := response.get("citations"):
+    # Add search results if available (replaces deprecated citations field)
+    if search_results := response.get("search_results"):
         output.append("\n\n📚 Sources:")
-        for i, citation in enumerate(citations, 1):
-            output.append(f"{i}. {citation}")
+        for i, result in enumerate(search_results, 1):
+            title = result.get("title", "Untitled")
+            url = result.get("url", "")
+            output.append(f"{i}. [{title}]({url})")
 
     # Add images if available
     if images := response.get("images"):
@@ -78,7 +80,7 @@ def _chat_completion(
     query: str,
     model: Literal["sonar", "sonar-pro", "sonar-reasoning-pro"],
     search_mode: Optional[Literal["web", "academic", "sec"]] = None,
-    recency: Optional[Literal["day", "week", "month"]] = None,
+    recency: Optional[Literal["day", "week", "month", "year"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_images: bool = False,
     return_related_questions: bool = False,
@@ -193,7 +195,7 @@ def ask(
     sources: Literal["web", "sec", "academic"] = "web",
     scope: Literal["standard", "extensive"] = "standard",
     thoroughness: Literal["quick", "detailed"] = "quick",
-    recency: Optional[Literal["day", "week", "month"]] = None,
+    recency: Optional[Literal["day", "week", "month", "year"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_related_questions: bool = False,
     max_tokens: int = 5000,
@@ -238,7 +240,7 @@ def ask_reasoning(
     query: str,
     scope: Literal["standard", "extensive"] = "standard",
     thoroughness: Literal["quick", "detailed"] = "quick",
-    recency: Optional[Literal["day", "week", "month"]] = None,
+    recency: Optional[Literal["day", "week", "month", "year"]] = None,
     domain_filter: Optional[list[str]] = None,
     return_related_questions: bool = False,
     max_tokens: int = 5000,
